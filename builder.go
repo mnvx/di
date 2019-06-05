@@ -102,6 +102,36 @@ func (b *Builder) add(def Def) error {
 	return nil
 }
 
+func (b *Builder) Set(defs ...Def) error {
+	for _, def := range defs {
+		if err := b.set(def); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (b *Builder) set(def Def) error {
+	if def.Name == "" {
+		return errors.New("name can not be empty")
+	}
+
+	// note that an empty scope is allowed
+	// it will be replaced in the Build method by the most generic scope
+	if def.Scope != "" && !b.scopes.Contains(def.Scope) {
+		return fmt.Errorf("scope `%s` is not allowed", def.Scope)
+	}
+
+	if def.Build == nil {
+		return errors.New("Build can not be nil")
+	}
+
+	b.definitions[def.Name] = def
+
+	return nil
+}
+
 func (b *Builder) checkName(name string) error {
 	if name == "" {
 		return errors.New("name can not be empty")
